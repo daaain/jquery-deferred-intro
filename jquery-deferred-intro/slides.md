@@ -213,5 +213,5 @@ $.when( { testing: 123 } ).done(
   function(x) { alert(x.testing); } /* alerts "123" */
 );
 ```
-* jQuery is not the only one, see:  
-  http://wiki.commonjs.org/wiki/Promises/A
+* jQuery is not the only one, see [Promises/A spec](http://wiki.commonjs.org/wiki/Promises/A)
+* Dig deeper before [you miss the point](http://domenic.me/2012/10/14/youre-missing-the-point-of-promises/) :)
