@@ -27,7 +27,7 @@
     <section class='slide'>
       <div class='spacer top'></div>
       <div class='content'>
-        <h1>jQuery Deferred / Promise</h1>
+        <h1>Deferred / Promise pattern using jQuery</h1>
         
         <p>Daniel Demmel | @daaain<br/>
         ustwo™ design studio | ustwo.co.uk</p>
@@ -35,16 +35,16 @@
       <div class='spacer bottom'></div>
     </section>
     <section class='slide'>
-  <div class='spacer top'></div>
-  <div class='content'>
-    <h1>A convoluted example</h1>
-
-<p><img src="images/example.png" alt="image" /></p>
-
-<p><code>http://jsfiddle.net/dain/87uPV/3</code></p>
-  </div>
-  <div class='spacer bottom'></div>
-</section>
+      <div class='spacer top'></div>
+      <div class='content'>
+        <h1>A convoluted example</h1>
+        
+        <p><img src="images/example.png" alt="image" /></p>
+        
+        <p><a href="http://jsfiddle.net/dain/87uPV/3">http://jsfiddle.net/dain/87uPV/3</a></p>
+      </div>
+      <div class='spacer bottom'></div>
+    </section>
     <section class='slide'>
   <div class='spacer top'></div>
   <div class='content'>
@@ -60,8 +60,6 @@
     <section class='slide'>
   <div class='spacer top'></div>
   <div class='content'>
-    <h1>Why?</h1>
-    
     <h2>Timing</h2>
     
     <p><textarea class='code' display='none' mode='javascript'>$(document).ready(function () {&#x000A;  $.ajax({&#x000A;    type: 'GET',&#x000A;    url: 'http://www.html5rocks.com/en/tutorials/file/xhr2/',&#x000A;    success: function(response) {&#x000A;      var insertDiv1 = $('<div></div>');&#x000A;      insertDiv1.html($(response).find('section').html());&#x000A;      $.ajax({&#x000A;        type: 'GET',&#x000A;        url: 'http://www.html5rocks.com/en/tutorials/audio/scheduling/',&#x000A;        success: function(response) {&#x000A;          var insertDiv2 = $('<div></div>');&#x000A;          insertDiv2.html($(response).find('section').html());&#x000A;          $('body').append(insertDiv1, '<hr/>', insertDiv2);&#x000A;        }&#x000A;      });&#x000A;    }&#x000A;  });&#x000A;});</textarea>
@@ -80,7 +78,7 @@
 <li>A proxy for an asynchronous, future event</li>
 <li>Has an interface for getting <code>resolve()</code>d or <code>reject()</code>ed</li>
 <li>Starts in <code>pending</code> state, can only be finished once</li>
-<li>Calls listeners immediately (still async) once resolved</li>
+<li>Calls listeners immediately (but always async) once resolved</li>
 </ul>
   </div>
   <div class='spacer bottom'></div>
@@ -88,14 +86,11 @@
     <section class='slide'>
   <div class='spacer top'></div>
   <div class='content'>
-    <h1>What?</h1>
-
-<h2>Promise</h2>
+    <h2>Promise</h2>
 
 <ul>
-<li>Allows listening and state inspection,<br/>
-but no interface for resolution</li>
-<li>Basic listeners are <code>done()</code> and <code>fail()</code></li>
+<li>Allows listening and state inspection (using <code>state()</code>), but completely immutable so no interface for resolution</li>
+<li>Basic (jQuery specific) listeners are <code>done()</code> and <code>fail()</code></li>
 <li>Can be chained with <code>then()</code> (used to be <code>pipe()</code>)</li>
 <li>Can be grouped and processed using <code>$.when()</code></li>
 </ul>
@@ -109,10 +104,19 @@ but no interface for resolution</li>
     
     <h2>Canonical Deferred</h2>
     
+    <p>Setting up a listener and triggering it with resolve</p>
+    
     <p><textarea class='code' display='none' mode='javascript'>var deferred = $.Deferred();&#x000A;&#x000A;deferred.done(function(value) {&#x000A;   alert(value);&#x000A;});&#x000A;&#x000A;deferred.resolve("hello world");</textarea>
 </p>
+  </div>
+  <div class='spacer bottom'></div>
+</section>
+    <section class='slide'>
+  <div class='spacer top'></div>
+  <div class='content'>
+    <h2>Canonical Deferred post-resolve</h2>
     
-    <p>This also works:</p>
+    <p>A resolved Deferred will still trigger the callback</p>
     
     <p><textarea class='code' display='none' mode='javascript'>var deferred = $.Deferred();&#x000A;&#x000A;deferred.resolve("hello world");&#x000A;&#x000A;deferred.done(function(value) {&#x000A;   alert(value);&#x000A;});</textarea>
 </p>
@@ -122,9 +126,9 @@ but no interface for resolution</li>
     <section class='slide'>
   <div class='spacer top'></div>
   <div class='content'>
-    <h1>How?</h1>
-    
     <h2>Canonical Promise + When</h2>
+    
+    <p>Return a Promise from a method and attach a listener to it (can have more than one)</p>
     
     <p><textarea class='code' display='none' mode='javascript'>function getPromise() {&#x000A;  var deferred = $.Deferred();&#x000A;  &#x000A;  setTimeout(function(){&#x000A;    deferred.resolve("hurray");&#x000A;  }, 1000);&#x000A;  &#x000A;  return deferred.promise();&#x000A;}&#x000A;&#x000A;$.when( getPromise() ).done(function(value) {&#x000A;   alert(value);&#x000A;});</textarea>
 </p>
@@ -134,9 +138,9 @@ but no interface for resolution</li>
     <section class='slide'>
   <div class='spacer top'></div>
   <div class='content'>
-    <h1>How?</h1>
-    
     <h2>Untangle our example</h2>
+    
+    <p>Create a Promise for DOM ready and the two AJAX requests and wait for all of them to be fulfilled</p>
     
     <p><textarea class='code' display='none' mode='javascript'>function getReady() {&#x000A;  var deferredReady = $.Deferred();&#x000A;  $(document).ready(function() {&#x000A;    deferredReady.resolve();&#x000A;  });&#x000A;  return deferredReady.promise();&#x000A;}&#x000A;&#x000A;var firstRequest = $.ajax({ url: 'http://www.html5rocks.com/en/tutorials/file/xhr2/' }),&#x000A;    secondRequest = $.ajax({ url: 'http://www.html5rocks.com/en/tutorials/audio/scheduling/' });&#x000A;&#x000A;$.when( getReady(), firstRequest, secondRequest&#x000A;).done( function( readyResponse, firstResponse, secondResponse ) {&#x000A;  var insertDiv1 = $('<div></div>');&#x000A;  insertDiv1.html($(firstResponse[0]).find('section').html());&#x000A;  var insertDiv2 = $('<div></div>');&#x000A;  insertDiv2.html($(secondResponse[0]).find('section').html());&#x000A;  $('body').append(insertDiv1, '<hr/>', insertDiv2);&#x000A;});</textarea>
 </p>
@@ -146,12 +150,41 @@ but no interface for resolution</li>
     <section class='slide'>
   <div class='spacer top'></div>
   <div class='content'>
-    <h1>How?</h1>
-    
     <h2>Another solution</h2>
-    
-    <p><textarea class='code' display='none' mode='javascript'>function getReady() {&#x000A;  var deferredReady = $.Deferred();&#x000A;  $(document).ready(function() {&#x000A;    deferredReady.resolve();&#x000A;  });&#x000A;  return deferredReady.promise();&#x000A;}&#x000A;&#x000A;var firstRequest = $.ajax({ url: 'http://www.html5rocks.com/en/tutorials/file/xhr2/' }),&#x000A;    secondRequest = $.ajax({ url: 'http://www.html5rocks.com/en/tutorials/audio/scheduling/' }),&#x000A;    firstDiv,&#x000A;    secondDiv;&#x000A;&#x000A;$.when( firstRequest, secondRequest&#x000A;).then( function( firstResponse, secondResponse ) {&#x000A;  firstDiv = $('<div></div>').html($(firstResponse[0]).find('section').html());&#x000A;  secondDiv = $('<div></div>').html($(secondResponse[0]).find('section').html());&#x000A;  return getReady();&#x000A;}).done( function( readyResponse, firstResponse, secondResponse ) {&#x000A;  $('body').append(firstDiv, '<hr/>', secondDiv);&#x000A;});</textarea>
+
+<p>The AJAX request can be already fired off while we wait for the DOM (using chained listeners with <code>then()</code>)</p>
+
+<p><textarea class='code' display='none' mode='javascript'>function getReady() {&#x000A;  var deferredReady = $.Deferred();&#x000A;  $(document).ready(function() {&#x000A;    deferredReady.resolve();&#x000A;  });&#x000A;  return deferredReady.promise();&#x000A;}&#x000A;&#x000A;var firstRequest = $.ajax({ url: 'http://www.html5rocks.com/en/tutorials/file/xhr2/' }),&#x000A;    secondRequest = $.ajax({ url: 'http://www.html5rocks.com/en/tutorials/audio/scheduling/' }),&#x000A;    firstDiv,&#x000A;    secondDiv;&#x000A;&#x000A;$.when( firstRequest, secondRequest&#x000A;).then( function( firstResponse, secondResponse ) {&#x000A;  firstDiv = $('<div></div>').html($(firstResponse[0]).find('section').html());&#x000A;  secondDiv = $('<div></div>').html($(secondResponse[0]).find('section').html());&#x000A;  return getReady();&#x000A;}).done( function( readyResponse, firstResponse, secondResponse ) {&#x000A;  $('body').append(firstDiv, '<hr/>', secondDiv);&#x000A;});</textarea>
 </p>
+  </div>
+  <div class='spacer bottom'></div>
+</section>
+    <section class='slide'>
+  <div class='spacer top'></div>
+  <div class='content'>
+    <h2>Dealing with rejection</h2>
+
+<p>When a Promise gets <code>reject()</code>ed it will immediately cascade down the <code>then()</code> chain</p>
+
+<p><textarea class='code' display='none' mode='javascript'>getTweetsFor("domenic") // promise-returning function&#x000A;  .then(function (tweets) {&#x000A;    var shortUrls = parseTweetsForUrls(tweets);&#x000A;    var mostRecentShortUrl = shortUrls[0];&#x000A;    return expandUrlUsingTwitterApi(mostRecentShortUrl); // promise-returning function&#x000A;  })&#x000A;  .then(httpGet) // promise-returning function&#x000A;  .then(&#x000A;    function (responseBody) {&#x000A;      console.log("Most recent link text:", responseBody);&#x000A;    },&#x000A;    function (error) {&#x000A;      console.error("Error with the twitterverse:", error);&#x000A;    }&#x000A;  );</textarea>
+</p>
+
+<p>Example from <a href="http://domenic.me/2012/10/14/youre-missing-the-point-of-promises/">Domenic Denicola's blog post "You're Missing the Point of Promises"</a>, go and read it now!</p>
+  </div>
+  <div class='spacer bottom'></div>
+</section>
+    <section class='slide'>
+  <div class='spacer top'></div>
+  <div class='content'>
+    <h1>More?</h1>
+
+<h2>When to use <code>then()</code> and <code>done()</code></h2>
+
+<ul>
+<li><code>then()</code> is chainable, but is less performant as it has to create a new Promise to return.</li>
+<li><code>done()</code> is a simple callback and can register multiple handlers with it, but doesn't handle failure (you'll need to attach a <code>fail()</code> too).</li>
+<li>So: use <code>then()</code>s mid-chain and close it off with <code>done()</code> and <code>fail()</code>.</li>
+</ul>
   </div>
   <div class='spacer bottom'></div>
 </section>
@@ -161,13 +194,26 @@ but no interface for resolution</li>
     <h1>More?</h1>
 
 <ul>
-<li><code>notify()</code> and <code>progress()</code></li>
-<li><code>reject()</code> and failure filters</li>
-<li>transformations
+<li>For long requests use <code>notify()</code> and <code>progress()</code></li>
+<li>Use <code>always()</code> for catching all outcomes</li>
+<li>You can insert transformations into the <code>then()</code> chain
 <textarea class='code' display='none' mode='javascript'>$.when( { testing: 123 } ).done(&#x000A;  function(x) { alert(x.testing); } /* alerts "123" */&#x000A;);</textarea>
 </li>
-<li>jQuery is not the only one, see <a href="http://wiki.commonjs.org/wiki/Promises/A">Promises/A spec</a></li>
-<li>Dig deeper before <a href="http://domenic.me/2012/10/14/youre-missing-the-point-of-promises/">you miss the point</a> :)</li>
+<li>jQuery is not the only one, see <a href="http://wiki.commonjs.org/wiki/Promises/A">Promises/A spec</a> and the clarified <a href="http://promises-aplus.github.com/promises-spec/">Promises/A+ spec</a></li>
+<li>If you're not already using jQuery then <a href="https://github.com/kriskowal/q">Q</a>, <a href="https://github.com/tildeio/rsvp.js">rsvp.js</a> or <a href="https://github.com/cujojs/when">when</a> are better with interoperability by fully adhering to the specs.</li>
+</ul>
+  </div>
+  <div class='spacer bottom'></div>
+</section>
+    <section class='slide'>
+  <div class='spacer top'></div>
+  <div class='content'>
+    <h1>Even more?</h1>
+
+<ul>
+<li>This pattern is not limited to Javascript, in fact <a href="http://en.wikipedia.org/wiki/Futures_and_promises">Futures / Promises</a> pattern was first invented in 1976 as Eventual</li>
+<li>For Android you should look at <a href="https://github.com/CodeAndMagic/android-deferred-object">Android Deferred Object</a> and <a href="https://github.com/jdeferred/jdeferred">JDeferred</a></li>
+<li>For iOS try <a href="https://github.com/heavylifters/HLDeferred-objc">HLDeferred-objc</a> and <a href="https://github.com/mproberts/objc-promise">Objc-promise</a> or if you also need Observers take a look at Github's <a href="https://github.com/blog/1107-reactivecocoa-for-a-better-world">ReactiveCocoa</a></li>
 </ul>
   </div>
   <div class='spacer bottom'></div>
